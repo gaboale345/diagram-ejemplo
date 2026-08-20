@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Panel de Planificación Scrum Interactivo - Sistema Digital de Gestión de Citas y Turnos, Hospital Municipal Plan 3000">
+  <title>Plan de Proyecto Scrum | Hospital Municipal Plan 3000</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6.5.1 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- SortableJS CDN (Drag & Drop) -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+</head>
+<body>
+
+  <div id="app-container">
+
+    <!-- Sidebar Lateral de Navegación -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">
+          <i class="fa-solid fa-hospital-user"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">Plan 3000 Scrum</h1>
+          <p class="brand-subtitle">Gestión de Citas & Turnos</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">PANEL GENERAL</div>
+        <a class="nav-item active" data-view="dashboard">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-view="roles">
+          <i class="fa-solid fa-users-gear"></i>
+          <span>Roles Scrum</span>
+        </a>
+
+        <div class="nav-section-title">PLANIFICACIÓN</div>
+        <a class="nav-item" data-view="product-backlog">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Product Backlog</span>
+        </a>
+        <a class="nav-item" data-view="sprint-backlog">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Sprint & Kanban</span>
+        </a>
+        <a class="nav-item" data-view="user-stories">
+          <i class="fa-solid fa-book-bookmark"></i>
+          <span>Historias de Usuario</span>
+        </a>
+        <a class="nav-item" data-view="tasks-member">
+          <i class="fa-solid fa-tasks"></i>
+          <span>Tareas por Integrante</span>
+        </a>
+
+        <div class="nav-section-title">SEGUIMIENTO</div>
+        <a class="nav-item" data-view="timeline">
+          <i class="fa-solid fa-timeline"></i>
+          <span>Línea de Tiempo</span>
+        </a>
+        <a class="nav-item" data-view="schedule">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span>Cronograma Gantt</span>
+        </a>
+        <a class="nav-item" data-view="traceability">
+          <i class="fa-solid fa-diagram-project"></i>
+          <span>Matriz Trazabilidad</span>
+        </a>
+        <a class="nav-item" data-view="ceremonies">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Ceremonias Scrum</span>
+        </a>
+        <a class="nav-item" data-view="tools">
+          <i class="fa-solid fa-toolbox"></i>
+          <span>Herramientas</span>
+        </a>
+
+        <div class="nav-section-title">MÉTRICAS & IA</div>
+        <a class="nav-item" data-view="metrics">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Métricas & Velocidad</span>
+        </a>
+        <a class="nav-item" data-view="prompts-ia">
+          <i class="fa-solid fa-brain"></i>
+          <span>Prompts de IA</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span>Scrum 2 Semanas</span>
+        <span class="badge badge-status-DONE">v1.0 Final</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" id="mobile-toggle">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="header-title-area">
+            <h2 id="current-section-title">Dashboard Principal</h2>
+            <p id="current-section-desc">Resumen en tiempo real del progreso, métricas y estado del Sprint</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button class="btn-presentation-mode" onclick="openPresentationMode()">
+            <i class="fa-solid fa-play"></i> Modo Presentación (Canva / PPT)
+          </button>
+
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="global-search-input" placeholder="Buscar historias o tareas...">
+          </div>
+
+          <div class="sprint-badge">
+            <span class="pulse-dot"></span>
+            <span>Sprint 1 en Ejecución</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Views -->
+      <main class="content-body">
+
+        <!-- 1. DASHBOARD PRINCIPAL -->
+        <section class="view-section active" id="view-dashboard">
+
+          <!-- Stat Cards Row -->
+          <div class="grid-4 mb-24">
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-blue">
+                <i class="fa-solid fa-hospital"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" style="font-size: 1.1rem;">Hospital Plan 3000</span>
+                <span class="stat-label">Proyecto Sistema de Citas</span>
+              </div>
+            </div>
+
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-purple">
+                <i class="fa-solid fa-calendar-check"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">2 Semanas</span>
+                <span class="stat-label">Duración Sprint (10 días hábiles)</span>
+              </div>
+            </div>
+
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-teal">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">4 Miembros</span>
+                <span class="stat-label">Gabriel, Rudi, Olver, Mijail</span>
+              </div>
+            </div>
+
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-amber">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">14 Historias</span>
+                <span class="stat-label">39 Story Points en Sprint 1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secondary Stat Row -->
+          <div class="grid-4 mb-24">
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-green">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">240 Horas</span>
+                <span class="stat-label">60h por Integrante</span>
+              </div>
+            </div>
+
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-blue">
+                <i class="fa-solid fa-bars-staggered"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="dash-done-tasks">14 / 40</span>
+                <span class="stat-label">Tareas Completadas</span>
+              </div>
+            </div>
+
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-purple">
+                <i class="fa-solid fa-business-time"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="dash-done-hours">86h / 240h</span>
+                <span class="stat-label">Horas Ejecutadas</span>
+              </div>
+            </div>
+
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-teal">
+                <i class="fa-solid fa-spinner"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="dash-progress-pct">36%</span>
+                <span class="stat-label">Porcentaje de Avance</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sprint Progress Widget -->
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-bars-progress"></i> Progreso General del Sprint 1</span>
+              <span class="badge badge-status-DONE">En Desarrollo Hábil</span>
+            </div>
+            <div class="progress-bar-container" style="height: 14px;">
+              <div class="progress-bar-fill" id="dash-progress-bar" style="width: 36%;"></div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="grid-2 mb-24">
+            <div class="glass-card">
+              <div class="card-header-flex">
+                <span class="card-title"><i class="fa-solid fa-chart-pie"></i> Historias de Usuario por Prioridad</span>
+              </div>
+              <canvas id="chart-priority" height="200"></canvas>
+            </div>
+
+            <div class="glass-card">
+              <div class="card-header-flex">
+                <span class="card-title"><i class="fa-solid fa-chart-bar"></i> Horas Asignadas por Integrante (60h c/u)</span>
+              </div>
+              <canvas id="chart-member-hours" height="200"></canvas>
+            </div>
+          </div>
+
+          <!-- Burndown Chart Row -->
+          <div class="glass-card">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-chart-line"></i> Gráfico Burnup de Seguimiento (Horas Ejecutadas vs Ideal)</span>
+            </div>
+            <canvas id="chart-burndown" height="100"></canvas>
+          </div>
+
+        </section>
+
+
+        <!-- 2. ROLES SCRUM -->
+        <section class="view-section" id="view-roles">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-shield-halved"></i> Estructura de Roles en el Proyecto Scrum</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Respetando exactamente la distribución oficial indicada en el PDF para la asignación de 2 semanas de desarrollo.
+            </p>
+          </div>
+
+          <div class="grid-3 mb-24" id="roles-cards-container">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="glass-card mb-20">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-users-viewfinder"></i> Equipo de Desarrollo (Development Team)</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+              4 Desarrolladores con asignación de 60 horas cada uno (240 horas totales en el Sprint).
+            </p>
+          </div>
+
+          <div class="team-grid" id="team-members-container">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+
+        <!-- 3. PRODUCT BACKLOG -->
+        <section class="view-section" id="view-product-backlog">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-list-check"></i> Product Backlog Priorizado (14 Historias)</span>
+              <span class="badge badge-priority-A">Criterios de Priorización Aplicados</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 12px;">
+              Ponderación de priorización a 2 semanas: Valor paciente (30%), MVP (25%), Dependencias (20%), Complejidad (15%), Visibilidad (10%).
+            </p>
+          </div>
+
+          <!-- Controls & Filters -->
+          <div class="table-controls">
+            <div class="filter-group">
+              <label style="font-size: 0.8rem; color: var(--text-dim); font-weight: 600;">FILTRAR PRIORIDAD:</label>
+              <select class="filter-select" id="backlog-filter-priority">
+                <option value="ALL">Todas las Prioridades</option>
+                <option value="A">Prioridad Alta (A)</option>
+                <option value="M">Prioridad Media (M)</option>
+              </select>
+
+              <label style="font-size: 0.8rem; color: var(--text-dim); font-weight: 600; margin-left: 10px;">SPRINT:</label>
+              <select class="filter-select" id="backlog-filter-sprint">
+                <option value="ALL">Todas las Historias</option>
+                <option value="SPRINT1">Seleccionadas en Sprint 1 (11 HUs)</option>
+                <option value="BACKLOG">Backlog General (3 HUs restantes)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Backlog Table -->
+          <div class="glass-card">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>HISTORIA DE USUARIO</th>
+                    <th>PRIORIDAD</th>
+                    <th>ESTIMACIÓN</th>
+                    <th>DEPENDENCIAS</th>
+                    <th>ESTADO SPRINT</th>
+                    <th>RESPONSABLES</th>
+                  </tr>
+                </thead>
+                <tbody id="backlog-tbody">
+                  <!-- Rendered by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- 4. SPRINT BACKLOG & KANBAN -->
+        <section class="view-section" id="view-sprint-backlog">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <div>
+                <span class="card-title"><i class="fa-solid fa-rocket"></i> Sprint 1 — Tablero Kanban Interactivo</span>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                  Objetivo: Prototipo funcional para registro, consulta, solicitud, confirmación y gestión administrativa. (39 SP totales).
+                </p>
+              </div>
+              <span class="badge badge-status-DONE"><i class="fa-solid fa-hand-pointer"></i> Permite Drag & Drop</span>
+            </div>
+          </div>
+
+          <!-- Kanban Columns -->
+          <div class="kanban-board">
+
+            <!-- BACKLOG -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="column-title-wrap" style="color: var(--status-backlog);">
+                  <i class="fa-solid fa-box-archive"></i> BACKLOG
+                </div>
+                <span class="kanban-counter" id="cnt-backlog">0</span>
+              </div>
+              <div class="kanban-task-list" id="kanban-col-backlog" data-status="BACKLOG"></div>
+            </div>
+
+            <!-- TO DO -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="column-title-wrap" style="color: var(--status-todo);">
+                  <i class="fa-regular fa-square"></i> TO DO
+                </div>
+                <span class="kanban-counter" id="cnt-todo">0</span>
+              </div>
+              <div class="kanban-task-list" id="kanban-col-todo" data-status="TODO"></div>
+            </div>
+
+            <!-- IN PROGRESS -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="column-title-wrap" style="color: var(--status-in-progress);">
+                  <i class="fa-solid fa-spinner"></i> IN PROGRESS
+                </div>
+                <span class="kanban-counter" id="cnt-in-progress">0</span>
+              </div>
+              <div class="kanban-task-list" id="kanban-col-in-progress" data-status="IN_PROGRESS"></div>
+            </div>
+
+            <!-- TESTING -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="column-title-wrap" style="color: var(--status-testing);">
+                  <i class="fa-solid fa-vial-circle-check"></i> TESTING
+                </div>
+                <span class="kanban-counter" id="cnt-testing">0</span>
+              </div>
+              <div class="kanban-task-list" id="kanban-col-testing" data-status="TESTING"></div>
+            </div>
+
+            <!-- DONE -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="column-title-wrap" style="color: var(--status-done);">
+                  <i class="fa-solid fa-circle-check"></i> DONE
+                </div>
+                <span class="kanban-counter" id="cnt-done">0</span>
+              </div>
+              <div class="kanban-task-list" id="kanban-col-done" data-status="DONE"></div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- 5. HISTORIAS DE USUARIO (CARDS VIEW) -->
+        <section class="view-section" id="view-user-stories">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-book-bookmark"></i> Historias de Usuario (Haz clic para ver modal de detalles)</span>
+            </div>
+          </div>
+
+          <div class="grid-3" id="stories-cards-grid">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+
+        <!-- 6. TAREAS POR INTEGRANTE -->
+        <section class="view-section" id="view-tasks-member">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-tasks"></i> Desglose de Tareas por Integrante (60 Horas Exactas Cada Uno)</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+              Cada integrante tiene asignadas 60 horas exactas en el Sprint de 10 días hábiles (6 horas por día).
+            </p>
+          </div>
+
+          <div id="member-tasks-wrapper">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+
+        <!-- 7. LÍNEA DE TIEMPO INTERACTIVA (ROADMAP VISUAL) -->
+        <section class="view-section" id="view-timeline">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-timeline"></i> Línea de Tiempo Interactiva — Roadmap del Sprint (12 Días)</span>
+              <span class="badge badge-priority-A"><i class="fa-solid fa-flag"></i> Hitos Diarios</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+              Visualización estilo Canva/PowerPoint con la secuencia temporal del proyecto de 2 semanas, hitos clave y carga diaria.
+            </p>
+          </div>
+
+          <div class="timeline-container">
+            <div class="timeline-track-line"></div>
+            <div id="timeline-nodes-container">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </section>
+
+
+        <!-- 8. CRONOGRAMA GANTT -->
+        <section class="view-section" id="view-schedule">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-calendar-days"></i> Cronograma de Actividades — 12 Días del Sprint</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+              Distribución diaria del trabajo. Incluye 10 días hábiles de desarrollo, Día 7 de descanso y Día 12 de Review & Demo.
+            </p>
+          </div>
+
+          <div class="glass-card gantt-container">
+            <table class="gantt-table" id="gantt-table-element">
+              <!-- Rendered by JS -->
+            </table>
+          </div>
+        </section>
+
+
+        <!-- 9. MATRIZ DE TRAZABILIDAD -->
+        <section class="view-section" id="view-traceability">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-diagram-project"></i> Matriz de Trazabilidad Requisitos - Tareas - Responsables</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+              Permite validar la cobertura de cada Historia de Usuario a través de sus tareas técnicas asociadas.
+            </p>
+          </div>
+
+          <div class="glass-card">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID HISTORIA</th>
+                    <th>DESCRIPCIÓN REQUISITO</th>
+                    <th>TAREAS ASOCIADAS VINCULADAS</th>
+                    <th>RESPONSABLES ASIGNADOS</th>
+                    <th>SPRINT</th>
+                  </tr>
+                </thead>
+                <tbody id="traceability-tbody">
+                  <!-- Rendered by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- 10. CEREMONIAS SCRUM -->
+        <section class="view-section" id="view-ceremonies">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Ceremonias Scrum Oficiales del Proyecto</span>
+            </div>
+          </div>
+
+          <div class="grid-2" id="ceremonies-grid">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+
+        <!-- 11. HERRAMIENTAS -->
+        <section class="view-section" id="view-tools">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-toolbox"></i> Herramientas de Seguimiento y Gestión</span>
+            </div>
+          </div>
+
+          <div class="grid-3" id="tools-grid">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+
+        <!-- 12. MÉTRICAS SCRUM -->
+        <section class="view-section" id="view-metrics">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-chart-line"></i> Métricas Scrum Calculadas Dinámicamente</span>
+            </div>
+          </div>
+
+          <div class="grid-3 mb-24">
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-blue">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="metric-total-points">39</span>
+                <span class="stat-label">Story Points en Sprint 1</span>
+              </div>
+            </div>
+
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-green">
+                <i class="fa-solid fa-check-double"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="metric-completed-tasks">14 / 40</span>
+                <span class="stat-label">Tareas Técnicas Completadas</span>
+              </div>
+            </div>
+
+            <div class="glass-card stat-card">
+              <div class="stat-icon-wrapper stat-icon-purple">
+                <i class="fa-solid fa-stopwatch"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value" id="metric-completed-hours">86 / 240h</span>
+                <span class="stat-label">Horas Invertidas</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2 mb-24">
+            <div class="glass-card">
+              <div class="card-header-flex">
+                <span class="card-title"><i class="fa-solid fa-pie-chart"></i> Distribución de Estados de Tareas</span>
+              </div>
+              <canvas id="chart-task-status" height="200"></canvas>
+            </div>
+
+            <div class="glass-card">
+              <div class="card-header-flex">
+                <span class="card-title"><i class="fa-solid fa-gauge-high"></i> Velocidad del Sprint & Rendimiento</span>
+              </div>
+              <div style="padding: 20px; font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+                <div><strong>Velocidad Proyectada:</strong> 39 Story Points / 2 Semanas</div>
+                <div><strong>Capacidad Horaria:</strong> 240 Horas (100% de la capacidad de 4 desarrolladores)</div>
+                <div style="margin-top: 14px;"><strong>Eficiencia Promedio:</strong> 6.15 Horas por Story Point</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- 13. PROMPTS IA (SECCIÓN 9 PDF) -->
+        <section class="view-section" id="view-prompts-ia">
+          <div class="glass-card mb-24">
+            <div class="card-header-flex">
+              <span class="card-title"><i class="fa-solid fa-brain"></i> Registro de Prompts de Inteligencia Artificial (Sección 9 del PDF)</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+              Prompts utilizados para la generación, desglose y contrastación de la planificación ágil.
+            </p>
+          </div>
+
+          <div id="prompts-grid-wrapper">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Modal Global de Detalles -->
+  <div class="modal-backdrop" id="app-modal-backdrop">
+    <div class="modal-content" id="app-modal-content">
+      <!-- Modal Content Rendered Dynamically -->
+    </div>
+  </div>
+
+  <!-- VISOR DE PRESENTACIÓN CANVA / POWERPOINT (SLIDE DECK INTERACTIVO) -->
+  <div class="presentation-backdrop" id="presentation-backdrop">
+    
+    <!-- Presentation Header -->
+    <div class="presentation-header">
+      <div class="presentation-title">
+        <i class="fa-solid fa-file-powerpoint" style="color: var(--accent-secondary);"></i>
+        <span>Presentación Ejecutiva del Plan Scrum — Hospital Plan 3000</span>
+      </div>
+      <button class="presentation-close-btn" onclick="closePresentationMode()">
+        <i class="fa-solid fa-xmark"></i> Salir de Presentación (ESC)
+      </button>
+    </div>
+
+    <!-- Presentation Stage (Slides Container) -->
+    <div class="slide-stage">
+
+      <!-- Slide 1: Portada Canva -->
+      <div class="slide-content active">
+        <div class="canva-cover-slide">
+          <span class="canva-cover-badge"><i class="fa-solid fa-hospital"></i> Actividad 3.1 — Planificación Scrum</span>
+          <h1 class="canva-cover-title">Sistema Digital de Gestión de Citas y Turnos</h1>
+          <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 800px;">
+            Planificación Ágil de 2 Semanas (10 Días Hábiles) — Hospital Municipal Plan 3000
+          </p>
+          <div style="display: flex; gap: 16px; margin-top: 20px;">
+            <span class="badge badge-priority-A" style="font-size: 0.9rem; padding: 8px 16px;">4 Desarrolladores (60h c/u)</span>
+            <span class="badge badge-status-DONE" style="font-size: 0.9rem; padding: 8px 16px;">240 Horas Totales</span>
+            <span class="badge badge-status-TODO" style="font-size: 0.9rem; padding: 8px 16px;">39 Story Points en Sprint 1</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Visión General -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">1. Visión General y Objetivos del Proyecto</h2>
+        <p class="canva-slide-subtitle">Unidad 1: Especificación de Requisitos de Sistemas — Asignatura: Desarrollo de Sistemas 2</p>
+
+        <div class="grid-2 mb-24">
+          <div class="glass-card">
+            <h3 style="font-size: 1.15rem; color: var(--accent-primary); margin-bottom: 10px;"><i class="fa-solid fa-bullseye"></i> Objetivo Principal del Sprint 1</h3>
+            <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+              "Entregar un prototipo funcional del Sistema de Gestión de Citas que permita a los pacientes registrarse, consultar disponibilidad, solicitar citas y recibir confirmaciones; y al personal administrativo gestionar agendas y usuarios."
+            </p>
+          </div>
+          <div class="glass-card">
+            <h3 style="font-size: 1.15rem; color: var(--accent-teal); margin-bottom: 10px;"><i class="fa-solid fa-list-check"></i> Alcance del Plan (2 Semanas)</h3>
+            <ul style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.8; padding-left: 20px;">
+              <li>14 Historias de Usuario Priorizadas en el Backlog.</li>
+              <li>11 Historias Seleccionadas para el Sprint 1 (39 Story Points).</li>
+              <li>40 Tareas Técnicas asignadas entre 4 desarrolladores.</li>
+              <li>60 Horas por integrante (240 Horas totales de capacidad).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3: Equipo y Roles -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">2. Equipo de Trabajo y Tabla de Capacidad Scrum</h2>
+        <p class="canva-slide-subtitle">Distribución Oficial del Equipo (60 Horas Asignadas Cada Uno — 240h Totales)</p>
+
+        <div class="grid-4" style="margin-bottom: 12px;">
+          <div class="glass-card" style="text-align: center; padding: 12px;">
+            <div class="member-avatar-lg" style="margin: 0 auto 6px; background: #3b82f6; width: 42px; height: 42px; font-size: 1rem;">GA</div>
+            <h3 style="font-size: 0.95rem; font-weight: 700;">Gabriel Alcon</h3>
+            <span class="member-role-badge" style="font-size: 0.72rem; padding: 2px 8px;">Front-end / UI/UX</span>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">60 Horas (10 Tareas)</div>
+          </div>
+
+          <div class="glass-card" style="text-align: center; padding: 12px;">
+            <div class="member-avatar-lg" style="margin: 0 auto 6px; background: #8b5cf6; width: 42px; height: 42px; font-size: 1rem;">RC</div>
+            <h3 style="font-size: 0.95rem; font-weight: 700;">Rudi Condo</h3>
+            <span class="member-role-badge" style="font-size: 0.72rem; padding: 2px 8px;">Back-end / API</span>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">60 Horas (9 Tareas)</div>
+          </div>
+
+          <div class="glass-card" style="text-align: center; padding: 12px;">
+            <div class="member-avatar-lg" style="margin: 0 auto 6px; background: #14b8a6; width: 42px; height: 42px; font-size: 1rem;">OA</div>
+            <h3 style="font-size: 0.95rem; font-weight: 700;">Olver Alvarez</h3>
+            <span class="member-role-badge" style="font-size: 0.72rem; padding: 2px 8px;">Full-stack / DB / PO</span>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">60 Horas (11 Tareas)</div>
+          </div>
+
+          <div class="glass-card" style="text-align: center; padding: 12px;">
+            <div class="member-avatar-lg" style="margin: 0 auto 6px; background: #ec4899; width: 42px; height: 42px; font-size: 1rem;">MG</div>
+            <h3 style="font-size: 0.95rem; font-weight: 700;">Mijail Galarza</h3>
+            <span class="member-role-badge" style="font-size: 0.72rem; padding: 2px 8px;">QA / Front-end / SM</span>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">60 Horas (10 Tareas)</div>
+          </div>
+        </div>
+
+        <div id="pres-capacity-table-container"></div>
+      </div>
+
+      <!-- Slide 4: Línea de Tiempo del Sprint -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">3. Cronograma de Actividades Diarias por Integrante (12 Días)</h2>
+        <p class="canva-slide-subtitle">Distribución Diaria de Trabajo entre los 4 Integrantes del Equipo</p>
+
+        <div id="pres-schedule-table-container"></div>
+      </div>
+
+      <!-- Slide 5: Criterios de Priorización -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">4. Criterios de Priorización del Product Backlog</h2>
+        <p class="canva-slide-subtitle">Matriz de Ponderación Ponderada para el desarrollo en 2 semanas</p>
+
+        <div class="grid-3">
+          <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: var(--accent-primary); font-weight: 800;">30%</h3>
+            <h4>Valor para el Paciente</h4>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: var(--accent-teal); font-weight: 800;">25%</h3>
+            <h4>Funcionalidad Mínima Viable (MVP)</h4>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: var(--accent-secondary); font-weight: 800;">20%</h3>
+            <h4>Dependencias Técnicas</h4>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: var(--priority-medium); font-weight: 800;">15%</h3>
+            <h4>Complejidad de Implementación</h4>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: var(--status-testing); font-weight: 800;">10%</h3>
+            <h4>Visibilidad ante Stakeholders</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 6: Product Backlog Priorizado -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">5. Tabla del Product Backlog Priorizado con Integrantes Asignados</h2>
+        <p class="canva-slide-subtitle">14 Historias de Usuario Priorizadas — 11 Seleccionadas para Sprint 1 (39 Story Points)</p>
+
+        <div id="pres-product-backlog-table-container"></div>
+      </div>
+
+      <!-- Slide 7: Sprint Backlog & Kanban -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">6. Tabla del Sprint Backlog (40 Tareas Desglosadas por Integrante)</h2>
+        <p class="canva-slide-subtitle">Asignación Individual de Carga Horaria (60h c/u) y Tareas Técnicas</p>
+
+        <div id="pres-sprint-tasks-table-container"></div>
+      </div>
+
+      <!-- Slide 8: Matriz de Trazabilidad -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">7. Tabla de Matriz de Trazabilidad Requisitos - Tareas - Integrantes</h2>
+        <p class="canva-slide-subtitle">Mapeo Bidireccional entre Requisitos (HU), Tareas Técnicas e Integrantes Asignados</p>
+
+        <div id="pres-traceability-table-container"></div>
+      </div>
+
+      <!-- Slide 9: Ceremonias & Herramientas -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">8. Ceremonias Scrum & Herramientas de Seguimiento</h2>
+        <p class="canva-slide-subtitle">Eventos Ágiles Adaptados y Stack Tecnológico Colaborativo</p>
+
+        <div class="grid-2">
+          <div class="glass-card">
+            <h3 style="color: var(--accent-primary); font-size: 1.05rem; margin-bottom: 10px;"><i class="fa-solid fa-clock"></i> Ceremonias Scrum</h3>
+            <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; padding-left: 16px;">
+              <li><strong>Sprint Planning:</strong> Día 1 (09:00 - 11:00)</li>
+              <li><strong>Daily Scrum:</strong> Diaria Días 1-11 (09:00 - 09:15)</li>
+              <li><strong>Sprint Review:</strong> Día 12 (10:00 - 12:00)</li>
+              <li><strong>Sprint Retrospective:</strong> Día 12 (14:00 - 15:00)</li>
+            </ul>
+          </div>
+
+          <div class="glass-card">
+            <h3 style="color: var(--accent-teal); font-size: 1.05rem; margin-bottom: 10px;"><i class="fa-solid fa-toolbox"></i> Herramientas de Seguimiento</h3>
+            <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; padding-left: 16px;">
+              <li><strong>Trello / Jira:</strong> Seguimiento de Sprint Backlog</li>
+              <li><strong>GitHub / GitLab:</strong> Control de Versiones</li>
+              <li><strong>Figma:</strong> Prototipado y UX/UI</li>
+              <li><strong>Postman / Swagger:</strong> Documentación y pruebas API</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 10: Métricas Scrum -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">9. Métricas Scrum & Gráfico de Burnup</h2>
+        <p class="canva-slide-subtitle">Medición Dinámica de Avance del Sprint</p>
+
+        <div class="grid-3 mb-24">
+          <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2.2rem; color: var(--accent-primary); font-weight: 800;">39</h3>
+            <span>Story Points Objetivo</span>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2.2rem; color: var(--status-done); font-weight: 800;">240h</h3>
+            <span>Horas Planificadas</span>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2.2rem; color: var(--accent-teal); font-weight: 800;">100%</h3>
+            <span>Cobertura de Requisitos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 11: Prompts IA & Conclusiones -->
+      <div class="slide-content">
+        <h2 class="canva-slide-title">10. Prompts de IA Utilizados & Conclusiones</h2>
+        <p class="canva-slide-subtitle">Sección 9 del PDF — Apoyo de IA y Síntesis Final</p>
+
+        <div class="glass-card mb-20">
+          <h3 style="color: var(--accent-secondary); font-size: 1.1rem; margin-bottom: 8px;">Conclusión del Proyecto</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+            La planificación ágil estructurada a 2 semanas asegura la entrega de un MVP funcional para el Hospital Plan 3000, respetando la carga horaria realista de 60 horas por desarrollador y garantizando la calidad con pruebas continuas de QA.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Presentation Controls Bar -->
+    <div class="presentation-controls-bar">
+      <div class="slide-nav-buttons">
+        <button class="slide-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+        <button class="slide-btn" onclick="nextSlide()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+
+      <span class="slide-counter-badge" id="slide-counter-display">Diapositiva 1 de 11</span>
+
+      <div>
+        <small style="color: var(--text-dim);">Usa las flechas del teclado (← / →)</small>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Application Logic JS -->
+  <script src="js/app.js"></script>
+</body>
+</html>
